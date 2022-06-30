@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 jobs:
   build_image:
-    needs: test
     name: Build Docker image
     runs-on: ubuntu-latest
     environment: production
