@@ -17,6 +17,10 @@ jobs:
       - name: Create `.env`-file
         uses: SpicyPizza/create-envfile@v1.3
         with:
+          envkey_PAYMENT_ACCOUNT: ${{ secrets.PAYMENT_ACCOUNT }}
+          envkey_SPREADSHEET_NAME: ${{ secrets.SPREADSHEET_NAME }}
+          envkey_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          envkey_LARAVEL: ${{ secrets.LARAVEL }}
           envkey_LARAVEL: ${{ secrets.LARAVEL }}
           envkey_XSRF: ${{ secrets.XSRF }}
 
