@@ -1,0 +1,89 @@
+name: Publish Docker image
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+  workflow_dispatch:
+jobs:
+  build_image:
+    needs: test
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create `.env`-file
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_LARAVEL: ${{ secrets.LARAVEL }}
+          envkey_XSRF: ${{ secrets.XSRF }}
+
+      - name: Create `credentials.json`
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: echo $DATA > /credentials.json
+
+      - name: Build Docker image
+        run: |
+          docker build. -t ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+          mkdir -p artifacts
+          docker save ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }} > artifacts/docker-image.tar
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Save Docker image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-artifact
+          path: artifacts
+          retention-days: 1
+
+  push_image:
+    needs: build_image
+    name: Push Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve saved Docker image
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-artifact
+          path: artifacts
+
+      - name: Load Docker image
+        run: |
+          cd artifacts
+          docker load < docker-image.tar
+      - name: Login
+        run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+      - name: Delete artifact
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: docker-artifact
+
+  deploy_image:
+    needs: push_image
+    name: Deploy Docker image to server
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Connect and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+            docker container stop gsheet-finance
+            docker container rm gsheet-finance
+            docker image rm ghcr.io/dulliag/gsheet-finance:latest
+            docker pull ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+            docker tag ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }} ghcr.io/dulliag/gsheet-finance:latest
+            docker run -itd --restart on-failure:3 --name=gsheet-finance ghcr.io/dulliag/gsheet-finance:latest
