@@ -6,6 +6,8 @@ WORKDIR /usr/src/gsheet-finance/
 
 COPY package*.json ./
 
+COPY credentials.json ./
+
 RUN npm install
 
 COPY . .

@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 jobs:
   build_image:
-    needs: test
     name: Build Docker image
     runs-on: ubuntu-latest
     environment: production
@@ -21,13 +20,12 @@ jobs:
           envkey_SPREADSHEET_NAME: ${{ secrets.SPREADSHEET_NAME }}
           envkey_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           envkey_LARAVEL: ${{ secrets.LARAVEL }}
-          envkey_LARAVEL: ${{ secrets.LARAVEL }}
           envkey_XSRF: ${{ secrets.XSRF }}
 
       - name: Create `credentials.json`
         env:
           DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-        run: echo $DATA > /credentials.json
+        run: echo $DATA > /home/runner/work/gsheet-finance/gsheet-finance/credentials.json
 
       - name: Build Docker image
         run: |
