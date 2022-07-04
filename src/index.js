@@ -1,7 +1,37 @@
+require('dotenv').config();
+
+const MISSING_ENVIRONMENT_VARIABLES = [
+  'PRODUCTION',
+  'APPLICATION',
+  'SPREADSHEET_NAME',
+  'SPREADSHEET_ID',
+  'PAYMENT_ACCOUNT',
+  'LARAVEL',
+  'XSRF',
+  'DB_HOST',
+  'DB_USER',
+  'DB_PASSWORD',
+  'DB_DATABASE',
+].filter((variable) => !process.env[variable]);
+if (MISSING_ENVIRONMENT_VARIABLES.length >= 1) {
+  console.log(
+    'ERROR',
+    'Starting',
+    JSON.stringify({
+      missing: MISSING_ENVIRONMENT_VARIABLES,
+      error: 'client/missing-environmentv-variables',
+    })
+  );
+  process.exit(1);
+}
+
 const { google } = require('googleapis');
 const { CronJob } = require('cron');
+const { version } = require('../package.json');
 const { TransactionService } = require('./core/transaction.service');
+const { createLog } = require('./core/log.service');
 
+const PRODUCTION = process.env.PRODUCTION === 'true';
 const SPREADSHEET_NAME = process.env.SPREADSHEET_NAME;
 /**
  * @param {number} index
@@ -14,11 +44,18 @@ const DATA_RANGE = `${SPREADSHEET_NAME}!A3:O1000`;
 const PAYMENT_ACCOUNT = process.env.PAYMENT_ACCOUNT;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 
+createLog('LOG', 'Starting', `Starting ${process.env.APPLICATION} v${version}`);
+
 const task = new CronJob('0 3 * * *', async () => {
   const transactionService = new TransactionService();
 
-  // const todaysTransactions = getTodaysTransactions(PAYMENT_ACCOUNT);
+  createLog('LOG', 'Select data', `Select todays income from our bank-account`);
   const todaysTransactions = await transactionService.getTodaysIncome(PAYMENT_ACCOUNT);
+  createLog(
+    'INFORMATION',
+    'Receive data',
+    `Received '${todaysTransactions.length}' payments from our customers`
+  );
 
   // If we haven't received any payment we don't to update any data in our spreadsheet
   if (todaysTransactions.length === 0) return;
@@ -34,11 +71,16 @@ const task = new CronJob('0 3 * * *', async () => {
   // Instance of Google Sheets API
   const googleSheets = google.sheets({ version: 'v4', auth: client });
 
+  createLog('LOG', 'Select data', `Select open loans`);
   const openLoans = (await getFinanceData(googleSheets, auth, SPREADSHEET_ID, DATA_RANGE)).filter(
     (loan) => !loan.paid
   );
+  createLog(
+    'INFORMATION',
+    'Receive data',
+    `Received '${openLoans.length}' open loans from our customers`
+  );
 
-  console.log('Received ' + todaysTransactions.length + ' payment/s');
   const loansWhichReceivedPayment = openLoans
     .map((loan) => {
       const downPayments = todaysTransactions.filter(
@@ -54,6 +96,14 @@ const task = new CronJob('0 3 * * *', async () => {
     })
     // Because we aren't type-secure using Google Sheets we're gonna remove all entries which are undefined
     .filter((loan) => loan);
+  createLog(
+    'INFORMATION',
+    'Process loans',
+    JSON.stringify({
+      message: `Today '${openLoans.length}' loans have received a payment`,
+      loans: loansWhichReceivedPayment,
+    })
+  );
 
   // Update loans in Google Spreadsheet
   if (loansWhichReceivedPayment) {

@@ -6,6 +6,9 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
   workflow_dispatch:
+
+env:
+  NPM_TOKEN: ${{ secrets.PAT }}
 jobs:
   build_image:
     name: Build Docker image
@@ -16,11 +19,17 @@ jobs:
       - name: Create `.env`-file
         uses: SpicyPizza/create-envfile@v1.3
         with:
+          envkey_PRODUCTION: ${{ secrets.PAYMENT_ACCOUNT }}
+          envkey_APPLICATION: ${{ secrets.PAYMENT_ACCOUNT }}
           envkey_PAYMENT_ACCOUNT: ${{ secrets.PAYMENT_ACCOUNT }}
           envkey_SPREADSHEET_NAME: ${{ secrets.SPREADSHEET_NAME }}
           envkey_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           envkey_LARAVEL: ${{ secrets.LARAVEL }}
           envkey_XSRF: ${{ secrets.XSRF }}
+          envkey_DB_HOST: ${{ secrets.DB_HOST }}
+          envkey_DB_USER: ${{ secrets.DB_USER }}
+          envkey_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          envkey_DB_DATABASE: ${{ secrets.DB_DATABASE }}
 
       - name: Create `credentials.json`
         env:
@@ -29,7 +38,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build. -t ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+          rm .npmrc 
+          echo $'@dulliag:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken='$NPM_TOKEN >> .npmrc
+          docker build --secret id=npm,src=.npmrc . -t ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
           mkdir -p artifacts
           docker save ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }} > artifacts/docker-image.tar
         env:

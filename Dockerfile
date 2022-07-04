@@ -8,7 +8,7 @@ COPY package*.json ./
 
 COPY credentials.json ./
 
-RUN npm install
+RUN --mount=type=secret,id=npm,target=.npmrc npm install
 
 COPY . .
 
