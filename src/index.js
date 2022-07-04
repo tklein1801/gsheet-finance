@@ -106,21 +106,40 @@ const task = new CronJob('0 3 * * *', async () => {
   );
 
   // Update loans in Google Spreadsheet
-  if (loansWhichReceivedPayment) {
-    loansWhichReceivedPayment.forEach((payment) => {
-      googleSheets.spreadsheets.values.update({
-        auth,
-        spreadsheetId: SPREADSHEET_ID,
-        range: payment.range.split('!')[0] + '!' + payment.range.split(':')[1],
-        valueInputOption: 'USER_ENTERED',
-        resource: {
-          values: [[payment.alreadyPaid]],
-        },
+  try {
+    if (loansWhichReceivedPayment) {
+      loansWhichReceivedPayment.forEach((payment) => {
+        createLog(
+          'LOG',
+          'Updating loan',
+          JSON.stringify({
+            message: `Update loan '${payment.range}'`,
+            loan: {
+              range: payment.range.split('!')[0] + '!' + payment.range.split(':')[1],
+              ...payment,
+            },
+          })
+        );
+        if (!PRODUCTION) return;
+        googleSheets.spreadsheets.values.update({
+          auth,
+          spreadsheetId: SPREADSHEET_ID,
+          range: payment.range.split('!')[0] + '!' + payment.range.split(':')[1],
+          valueInputOption: 'USER_ENTERED',
+          resource: {
+            values: [[payment.alreadyPaid]],
+          },
+        });
       });
-    });
+    }
+  } catch (error) {
+    createLog('ERROR', 'Unknown', error);
+  } finally {
+    createLog('INFORMATION', 'Processing data', 'Processing done');
   }
 });
 
+task.fireOnTick();
 task.start();
 
 /**
@@ -129,6 +148,7 @@ task.start();
  * @returns {number} Parsed number
  */
 function parseCurrencyString(currencyString) {
+  if (!currencyString) console.log(currencyString);
   return Number(currencyString.replace(/[€.]+/g, '').split(',')[0]);
 }
 

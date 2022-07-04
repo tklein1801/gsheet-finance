@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const { addHours, previousDay } = require('date-fns');
+const { addHours, isSameDay } = require('date-fns');
 
 class TransactionService {
   COOKIES = {
@@ -43,7 +43,8 @@ class TransactionService {
    */
   getTodaysIncome = (iban, options = this.OPTIONS) => {
     return new Promise((res, rej) => {
-      const now = addHours(new Date(), 2);
+      let now = addHours(new Date(), 2);
+      now.setDate(now.getDate() - 1);
       axios
         .post(`https://info.realliferpg.de/banking/${iban}/data`, {}, options)
         .then((response) => {
@@ -54,14 +55,7 @@ class TransactionService {
                 date = `20${date.split('.')[2].substring(0, 2)}-${date.split('.')[1]}-${
                   date.split('.')[0]
                 }`;
-
-                // FIXME: Doesn't work and isn't requried
-                // let time = transaction.created_at.split('-')[1];
-                // time = .timesubstring(1, time.length) + ':00';
-                return (
-                  previousDay(now.getDate(), 1).getDate() === new Date(date).getDate() &&
-                  transaction.destination === iban
-                );
+                return isSameDay(new Date(date), now) && transaction.destination === iban;
               })
               .map((transaction) => ({ ...transaction, amount: Number(transaction.amount) }))
           );
