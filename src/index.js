@@ -54,7 +54,10 @@ const task = new CronJob('0 3 * * *', async () => {
   createLog(
     'INFORMATION',
     'Receive data',
-    `Received '${todaysTransactions.length}' payments from our customers`
+    JSON.stringify({
+      message: `Received '${todaysTransactions.length}' payments from our customers`,
+      transactions: todaysTransactions,
+    })
   );
 
   // If we haven't received any payment we don't to update any data in our spreadsheet
@@ -78,7 +81,10 @@ const task = new CronJob('0 3 * * *', async () => {
   createLog(
     'INFORMATION',
     'Receive data',
-    `Received '${openLoans.length}' open loans from our customers`
+    JSON.stringify({
+      message: `Received '${openLoans.length}' open loans from our customers`,
+      loans: openLoans,
+    })
   );
 
   const loansWhichReceivedPayment = openLoans
