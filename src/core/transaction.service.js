@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const { addHours, isSameDay } = require('date-fns');
+const { addHours, isSameDay, isAfter, isSameMinute } = require('date-fns');
 
 class TransactionService {
   COOKIES = {
@@ -55,7 +55,10 @@ class TransactionService {
                 date = `20${date.split('.')[2].substring(0, 2)}-${date.split('.')[1]}-${
                   date.split('.')[0]
                 }`;
-                return isSameDay(new Date(date), now) && transaction.destination === iban;
+                return (
+                  (isSameDay(new Date(date), now) || isAfter(new Date(date), now)) &&
+                  transaction.destination === iban
+                );
               })
               .map((transaction) => ({ ...transaction, amount: Number(transaction.amount) }))
           );
