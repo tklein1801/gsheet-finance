@@ -145,7 +145,7 @@ const task = new CronJob('0 3 * * *', async () => {
   }
 });
 
-task.fireOnTick();
+if (!PRODUCTION) task.fireOnTick();
 task.start();
 
 /**
