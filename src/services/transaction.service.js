@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const { addHours, isSameDay, isAfter, isSameMinute } = require('date-fns');
+const { addHours, isSameDay, isAfter } = require('date-fns');
 
 class TransactionService {
   COOKIES = {
@@ -16,8 +16,54 @@ class TransactionService {
   };
 
   constructor() {
+    if (!process.env.TRANSFER_TOKEN)
+      throw new Error("Environment-variable 'TRANSFER_TOKEN' not set");
+    this.TOKEN = process.env.TRANSFER_TOKEN;
     if (!process.env.LARAVEL) throw new Error("Environment-variable 'LARAVEL' not set");
     if (!process.env.XSRF) throw new Error("Environment-variable 'XSRF' not set");
+  }
+  /**
+   *
+   * @param {string} iban
+   * @param {{target: string; amount: number; info: string}} transaction
+   * @param {string} transferToken
+   * @param {{}} options
+   * @returns {Promise<string>}
+   */
+  transfer(iban, transaction, token = this.TOKEN, options = this.OPTIONS) {
+    return new Promise((res, rej) => {
+      axios
+        .post(
+          `https://info.realliferpg.de/banking/${iban}`,
+          {
+            _token: token,
+            type: 'init_transaction',
+            amount: transaction.amount.toString(),
+            iban: transaction.target,
+            info: transaction.info,
+          },
+          options
+        )
+        .then((response) => {
+          const RESULT = response.data;
+
+          if (!RESULT.includes('Deine Überweisung wurde aufgegeben und durchgeführt!')) {
+            if (RESULT.includes('Falsches IBAN-Format!')) throw new Error('Falsches IBAN-Format!');
+
+            if (RESULT.includes('Zu wenig Geld auf dem Konto!'))
+              throw new Error('Zu wenig Geld auf dem Konto!');
+
+            if (RESULT.includes('Zielkonto existiert nicht'))
+              throw new Error('Zielkonto existiert nicht!');
+
+            // console.log(RESULT);
+            throw new Error('Ein unbekannter Fehler ist aufgetreten!');
+          }
+
+          res('Das Geld wurde überwiesen');
+        })
+        .catch((err) => rej(err));
+    });
   }
 
   /**

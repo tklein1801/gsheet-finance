@@ -23,8 +23,11 @@ jobs:
           envkey_PRODUCTION: ${{ secrets.PRODUCTION }}
           envkey_APPLICATION: ${{ secrets.APPLICATION }}
           envkey_PAYMENT_ACCOUNT: ${{ secrets.PAYMENT_ACCOUNT }}
-          envkey_SPREADSHEET_NAME: ${{ secrets.SPREADSHEET_NAME }}
+          envkey_SPREADSHEET_FINANCE: ${{ secrets.SPREADSHEET_FINANCE }}
+          envkey_SPREADSHEET_SPENDINGS: ${{ secrets.SPREADSHEET_SPENDINGS }}
+          envkey_SPREADSHEET_PAYCHECKS: ${{ secrets.SPREADSHEET_PAYCHECKS }}
           envkey_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          envkey_TRANSFER_TOKEN: ${{ secrets.TRANSFER_TOKEN }}
           envkey_LARAVEL: ${{ secrets.LARAVEL }}
           envkey_XSRF: ${{ secrets.XSRF }}
           envkey_DB_HOST: ${{ secrets.DB_HOST }}
