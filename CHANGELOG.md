@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/DulliAG/gsheet-finance/compare/v1.0.4...v1.1.0) (2022-07-11)
+
+
+### Features
+
+* Add weekly paychecks ([3d1cde4](https://github.com/DulliAG/gsheet-finance/commit/3d1cde4a644b07686c3b0536efb2a0299a24b1f1))
+
+
+### Bug Fixes
+
+* Only fire-on-tick during development ([b11fde4](https://github.com/DulliAG/gsheet-finance/commit/b11fde472792479a8667192cdb40f711331c0c9a))
+
 ### [1.0.4](https://github.com/DulliAG/gsheet-finance/compare/v1.0.3...v1.0.4) (2022-07-06)
 
 
