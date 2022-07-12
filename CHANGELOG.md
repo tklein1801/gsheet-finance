@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/DulliAG/gsheet-finance/compare/v1.1.0...v1.1.1) (2022-07-12)
+
+
+### Bug Fixes
+
+* Enable load payments ([c4d2a45](https://github.com/DulliAG/gsheet-finance/commit/c4d2a45eb1997b000e4fef2638e01606eb1d8a02))
+
 ## [1.1.0](https://github.com/DulliAG/gsheet-finance/compare/v1.0.4...v1.1.0) (2022-07-11)
 
 
