@@ -19,13 +19,13 @@ checkForRequiredEnvironmentVariables([
 
 const { version } = require('../package.json');
 const { createLog } = require('./services/log.service');
-// const { checkLoanRepayment } = require('./tasks/loan-repayment.task');
+const { checkLoanRepayment } = require('./tasks/loan-repayment.task');
 const { payWeeklyPaycheck } = require('./tasks/paycheck.task');
 
 createLog('LOG', 'Starting', `Starting ${APPLICATION} v${version}`);
 
-// if (!PRODUCTION) checkLoanRepayment.fireOnTick();
-// checkLoanRepayment.start();
+if (!PRODUCTION) checkLoanRepayment.fireOnTick();
+checkLoanRepayment.start();
 
 if (!PRODUCTION) payWeeklyPaycheck.fireOnTick();
 payWeeklyPaycheck.start();
