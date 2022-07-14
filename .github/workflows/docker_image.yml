@@ -44,9 +44,9 @@ jobs:
         run: |
           rm .npmrc 
           echo $'@dulliag:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken='$NPM_TOKEN >> .npmrc
-          docker build --secret id=npm,src=.npmrc . -t ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+          docker build --secret id=npm,src=.npmrc . -t ghcr.io/tklein1801/gsheet-finance:${{ github.ref_name }}
           mkdir -p artifacts
-          docker save ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }} > artifacts/docker-image.tar
+          docker save ghcr.io/tklein1801/gsheet-finance:${{ github.ref_name }} > artifacts/docker-image.tar
         env:
           DOCKER_BUILDKIT: 1
 
@@ -77,7 +77,7 @@ jobs:
           echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Push Docker image
         run: |
-          docker push ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
+          docker push ghcr.io/tklein1801/gsheet-finance:${{ github.ref_name }}
       - name: Delete artifact
         uses: geekyeggo/delete-artifact@v1
         with:
@@ -100,7 +100,7 @@ jobs:
             echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
             docker container stop gsheet-finance
             docker container rm gsheet-finance
-            docker image rm ghcr.io/dulliag/gsheet-finance:latest
-            docker pull ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }}
-            docker tag ghcr.io/dulliag/gsheet-finance:${{ github.ref_name }} ghcr.io/dulliag/gsheet-finance:latest
-            docker run -itd --restart on-failure:3 --name=gsheet-finance ghcr.io/dulliag/gsheet-finance:latest
+            docker image rm ghcr.io/tklein1801/gsheet-finance:latest
+            docker pull ghcr.io/tklein1801/gsheet-finance:${{ github.ref_name }}
+            docker tag ghcr.io/tklein1801/gsheet-finance:${{ github.ref_name }} ghcr.io/tklein1801/gsheet-finance:latest
+            docker run -itd --restart on-failure:3 --name=gsheet-finance ghcr.io/tklein1801/gsheet-finance:latest

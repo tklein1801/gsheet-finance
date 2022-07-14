@@ -1,6 +1,6 @@
 FROM node:alpine
 
-LABEL org.opencontainers.image.source https://github.com/DulliAG/gsheet-finance
+LABEL org.opencontainers.image.source https://github.com/tklein1801/gsheet-finance
 
 WORKDIR /usr/src/gsheet-finance/
 
