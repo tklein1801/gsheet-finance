@@ -4,11 +4,7 @@ checkForRequiredEnvironmentVariables([
   'PRODUCTION',
   'APPLICATION',
   'SPREADSHEET_ID',
-  'SPREADSHEET_FINANCE',
-  'SPREADSHEET_PAYCHECKS',
-  'SPREADSHEET_SPENDINGS',
   'TRANSFER_TOKEN',
-  'PAYMENT_ACCOUNT',
   'LARAVEL',
   'XSRF',
   'DB_HOST',
@@ -18,14 +14,19 @@ checkForRequiredEnvironmentVariables([
 ]);
 
 const { version } = require('../package.json');
+const { paychecks, loans } = require('../config.json');
 const { createLog } = require('./services/log.service');
-const { checkLoanRepayment } = require('./tasks/loan-repayment.task');
+const { checkLoanPayments } = require('./tasks/loan-payment.task');
 const { payWeeklyPaycheck } = require('./tasks/paycheck.task');
 
 createLog('LOG', 'Starting', `Starting ${APPLICATION} v${version}`);
 
-if (!PRODUCTION) checkLoanRepayment.fireOnTick();
-checkLoanRepayment.start();
+if (loans.enabled) {
+  if (!PRODUCTION) checkLoanPayments.fireOnTick();
+  checkLoanPayments.start();
+}
 
-if (!PRODUCTION) payWeeklyPaycheck.fireOnTick();
-payWeeklyPaycheck.start();
+if (paychecks.enabled) {
+  if (!PRODUCTION) payWeeklyPaycheck.fireOnTick();
+  payWeeklyPaycheck.start();
+}

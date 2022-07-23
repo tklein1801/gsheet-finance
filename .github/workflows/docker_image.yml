@@ -22,10 +22,6 @@ jobs:
         with:
           envkey_PRODUCTION: ${{ secrets.PRODUCTION }}
           envkey_APPLICATION: ${{ secrets.APPLICATION }}
-          envkey_PAYMENT_ACCOUNT: ${{ secrets.PAYMENT_ACCOUNT }}
-          envkey_SPREADSHEET_FINANCE: ${{ secrets.SPREADSHEET_FINANCE }}
-          envkey_SPREADSHEET_SPENDINGS: ${{ secrets.SPREADSHEET_SPENDINGS }}
-          envkey_SPREADSHEET_PAYCHECKS: ${{ secrets.SPREADSHEET_PAYCHECKS }}
           envkey_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           envkey_TRANSFER_TOKEN: ${{ secrets.TRANSFER_TOKEN }}
           envkey_LARAVEL: ${{ secrets.LARAVEL }}
@@ -38,6 +34,11 @@ jobs:
       - name: Create `credentials.json`
         env:
           DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: echo $DATA > /home/runner/work/gsheet-finance/gsheet-finance/credentials.json
+
+      - name: Create `config.json`
+        env:
+          DATA: ${{ secrets.CONFIG }}
         run: echo $DATA > /home/runner/work/gsheet-finance/gsheet-finance/credentials.json
 
       - name: Build Docker image

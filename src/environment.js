@@ -24,16 +24,11 @@ const APPLICATION = process.env.APPLICATION;
 const PRODUCTION = process.env.PRODUCTION === 'true';
 const SPREADSHEET = {
   id: process.env.SPREADSHEET_ID,
-  finance: process.env.SPREADSHEET_FINANCE,
-  paychecks: process.env.SPREADSHEET_PAYCHECKS,
-  spendings: process.env.SPREADSHEET_SPENDINGS,
 };
-const PAYMENT_ACCOUNT = process.env.PAYMENT_ACCOUNT;
 
 module.exports = {
   checkForRequiredEnvironmentVariables,
   APPLICATION,
   PRODUCTION,
   SPREADSHEET,
-  PAYMENT_ACCOUNT,
 };

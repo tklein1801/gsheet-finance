@@ -1,4 +1,6 @@
 const { CronJob } = require('cron');
+const config = require('../../config.json');
+const paycheckCfg = config.paychecks;
 const { SPREADSHEET, PRODUCTION, APPLICATION, PAYMENT_ACCOUNT } = require('../environment');
 const { createLog } = require('../services/log.service');
 const { google } = require('googleapis');
@@ -9,8 +11,7 @@ const { TransactionService } = require('../services/transaction.service');
 /**
  * @returns {CronJob}
  */
-const payWeeklyPaycheck = new CronJob('0 3 * * SUN', async () => {
-  const transactionService = new TransactionService();
+const payWeeklyPaycheck = new CronJob(paycheckCfg.execution, async () => {
   const auth = new google.auth.GoogleAuth({
     keyFile: './credentials.json',
     scopes: 'https://www.googleapis.com/auth/spreadsheets',
@@ -37,7 +38,7 @@ const payWeeklyPaycheck = new CronJob('0 3 * * SUN', async () => {
     googleSheets,
     auth,
     SPREADSHEET.id,
-    `${SPREADSHEET.paychecks}!F3:J19`
+    `${paycheckCfg.spreadsheet.paychecks}!F3:J19`
   );
   createLog(
     'LOG',
@@ -53,28 +54,27 @@ const payWeeklyPaycheck = new CronJob('0 3 * * SUN', async () => {
   paychecks.map((paycheck, index) => {
     setTimeout(() => {
       const info = `Gehalt ${paycheck.employee} (${paycheck.bankAccount}) - BKR Autohof`;
-      if (!PRODUCTION) {
-        createLog(
-          'INFORMATION',
-          'Paycheck payment',
-          JSON.stringify({ message: 'Simulierte transaktion (Dev-Umgebung)', paycheck: paycheck })
-        );
-        // return;
-      }
+      if (!PRODUCTION) return;
       new TransactionService()
-        .transfer(PAYMENT_ACCOUNT, {
+        .transfer(paycheckCfg.paymentAccount, {
           target: paycheck.bankAccount,
           amount: paycheck.paycheck,
           info: info,
         })
         .then((result) => {
-          addSpending(googleSheets, auth, SPREADSHEET.id, `${SPREADSHEET.spendings}!A4:F`, {
-            employee: APPLICATION,
-            receiver: paycheck.employee,
-            category: 'Gehalt',
-            info: info,
-            amount: paycheck.paycheck,
-          });
+          addSpending(
+            googleSheets,
+            auth,
+            SPREADSHEET.id,
+            `${paycheckCfg.spreadsheet.outgoings}!A4:F`,
+            {
+              employee: APPLICATION,
+              receiver: paycheck.employee,
+              category: 'Gehalt',
+              info: info,
+              amount: paycheck.paycheck,
+            }
+          );
           createLog(
             'LOG',
             'Paycheck payment',

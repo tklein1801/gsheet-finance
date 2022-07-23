@@ -29,17 +29,10 @@ async function getFinanceData(googleSheets, auth, spreadsheetId, range) {
     })
   ).data.values
     .filter((data) => data.length >= 12 && data[2] !== '')
-    .map((data, index) => {
-      /**
-       * @param {number} index
-       * @param {number} offset DEFAULT = 3
-       * @returns {string}
-       */
-      const ROW_RANGE = (index, offset = 3) =>
-        `${SPREADSHEET.finance}!A${offset + index}:O${offset + index}`;
-
+    .map((data) => {
+      const ROW = data[0].split('FI-')[1];
       return {
-        range: ROW_RANGE(index), // FIXME: Wrong value
+        range: `Finanzierungen!A${ROW}:O${ROW}`,
         paid: data[1] === 'TRUE',
         date: data[2],
         employee: data[3],
