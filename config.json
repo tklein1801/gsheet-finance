@@ -1,0 +1,14 @@
+{
+  "paychecks": {
+    "enabled": true,
+    "execution": "0 3 * * SUN",
+    "spreadsheet": { "paychecks": "Übersicht", "outgoings": "Ausgaben" },
+    "paymentAccount": "NH092867"
+  },
+  "loans": {
+    "enabled": true,
+    "execution": "0 3 * * *",
+    "spreadsheet": { "loans": "Finanzierungen" },
+    "bankAccount": "NH822859"
+  }
+}

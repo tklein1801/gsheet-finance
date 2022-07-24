@@ -36,11 +36,6 @@ jobs:
           DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: echo $DATA > /home/runner/work/gsheet-finance/gsheet-finance/credentials.json
 
-      - name: Create `config.json`
-        env:
-          DATA: ${{ secrets.CONFIG }}
-        run: echo $DATA > /home/runner/work/gsheet-finance/gsheet-finance/credentials.json
-
       - name: Build Docker image
         run: |
           rm .npmrc 
